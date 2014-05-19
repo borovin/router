@@ -1,0 +1,33 @@
+{
+    "name": "router",
+    "main": "router.js",
+    "authors": [
+        "Andrew Borovin <a@borovin.com>"
+    ],
+    "description": "simple router component for modern SPA",
+    "moduleType": [
+        "amd"
+    ],
+    "dependencies": {
+        "uri.js": "~1.13",
+        "lodash": "~2.4"
+    },
+    "keywords": [
+        "amd",
+        "requirejs",
+        "router"
+    ],
+    "license": "MIT",
+    "ignore": [
+        "**/.*",
+        "node_modules",
+        "bower_components",
+        "test",
+        "tests",
+        "path",
+        "example.html",
+        "karma.conf.js",
+        "package.json",
+        "karma.main.js"
+    ]
+}
