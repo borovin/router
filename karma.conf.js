@@ -15,14 +15,14 @@ module.exports = function(config) {
         // list of files / patterns to load in the browser
         files: [
             'karma.main.js',
-            {pattern: 'bower_components/**/*.js', included: false},
-            {pattern: 'router.js', included: false},
-            {pattern: '*.spec.js', included: false}
+            {pattern: '**/*.js', included: false}
         ],
 
 
         // list of files to exclude
         exclude: [
+            'karma.conf.js',
+            'bower_components/**/*.spec.js'
         ],
 
 
