@@ -22,7 +22,8 @@ module.exports = function(config) {
         // list of files to exclude
         exclude: [
             'karma.conf.js',
-            'bower_components/**/*.spec.js'
+            'bower_components/**/*.spec.js',
+            'node_modules/**/*.spec.js'
         ],
 
 
