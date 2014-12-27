@@ -131,7 +131,9 @@ define(function(require) {
             if (fragment == null) {
                 fragment = window.location.pathname + window.location.search;
                 var root = this.root.replace(trailingSlash, '');
-                if (!fragment.indexOf(root)) fragment = fragment.substr(root.length);
+                if (!fragment.indexOf(root)) {
+                    fragment = fragment.substr(root.length);
+                }
             }
 
             return fragment.replace(routeStripper, '');
