@@ -1,5 +1,5 @@
 var specFiles = Object.keys(window.__karma__.files).filter(function (file) {
-    return /\.spec\.js$/.test(file);
+    return file.indexOf('/base/tests/') === 0;
 });
 
 var specModules = specFiles.map(function(moduleUrl){
@@ -8,8 +8,4 @@ var specModules = specFiles.map(function(moduleUrl){
         .replace(/.js/g, '');
 });
 
-require({
-    baseUrl: '/base/'
-}, function(){
-    require(specModules, window.__karma__.start);
-});
+require(specModules, window.__karma__.start);

@@ -5,39 +5,42 @@ module.exports = function(config) {
     config.set({
 
         // base path, that will be used to resolve files and exclude
-        basePath: '',
-
+        basePath: '../',
 
         // frameworks to use
         frameworks: ['jasmine', 'requirejs'],
 
-
         // list of files / patterns to load in the browser
         files: [
-            'karma.main.js',
-            {pattern: '**/*.js', included: false}
+            'tools/polyfills.js',
+            'require.config.js',
+            'tools/require.config.test.js',
+            'tools/karma.main.js',
+            {pattern: 'router.js', included: false},
+            {pattern: 'bower_components/**/*', included: false},
+            {pattern: 'tests/**/*', included: false}
         ],
-
 
         // list of files to exclude
         exclude: [
-            'karma.conf.js',
-            'bower_components/**/*.spec.js',
-            'node_modules/**/*.spec.js'
         ],
 
 
         // test results reporter to use
         // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-        reporters: ['dots'],
+        reporters: ['dots', 'coverage'],
 
         preprocessors: {
             // source files, that you wanna generate coverage for
             // do not include tests or libraries
-            // (these files will be instrumented by Istanbul),
-            //'requireDom.js': 'coverage'
+            // (these files will be instrumented by Istanbul)
+            'block.js': ['coverage']
         },
 
+        coverageReporter: {
+            type : 'lcov',
+            dir : 'coverage/'
+        },
 
         // web server port
         port: 9876,
@@ -64,7 +67,7 @@ module.exports = function(config) {
         // - Safari (only Mac)
         // - PhantomJS
         // - IE (only Windows)
-        browsers: ['Chrome'],
+        browsers: ['PhantomJS'],
 
 
         // If browser does not capture in given timeout [ms], kill it

@@ -1,8 +1,8 @@
 define(function(require, exports, module) {
     //requirements
-    var router = require('./router');
+    var router = require('../router');
 
-    describe(module.id, function() {
+    describe('router common tests', function() {
 
         afterEach(function() {
             router.routes = {};
