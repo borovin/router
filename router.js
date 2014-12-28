@@ -179,10 +179,13 @@ define(function(require) {
                 routeRegExp: routeRegExp,
                 callback: function(fragment) {
                     var params = router._extractParameters(route, routeRegExp, fragment);
-                    callback && callback.call(router, {
-                        params: params,
-                        route: route
-                    });
+
+                    if (callback){
+                        callback.call(router, {
+                            params: params,
+                            route: route
+                        });
+                    }
                 }
             });
 
