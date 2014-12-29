@@ -3,7 +3,7 @@ define(function(require, exports, module) {
     var Router = require('router'),
         Backbone = require('bower_components/backbone/backbone');
 
-    describe('router common tests', function() {
+    describe('Ининциализация и навигация по роутам', function() {
 
         afterEach(function() {
             Backbone.history.stop();
@@ -30,18 +30,41 @@ define(function(require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'stores/:storeId/products/:productId': handler,
-                    'test/:storeId/products/:productId': handler
+                    'stores/:storeId/products/:productId': handler
                 }
             });
 
             Backbone.history.start({pushState: true});
 
-            router.navigate('/stores/1/products/2');
+            router.navigate('/stores/1/products/2', {
+                trigger: true
+            });
 
             expect(handler).toHaveBeenCalledWith({
                 storeId: '1',
                 productId: '2'
+            });
+        });
+
+        it('Вызов роута с опциональными параметрами', function() {
+
+            var handler = jasmine.createSpy('handler');
+
+            var router = new Router({
+                routes: {
+                    'stores/:storeId(/products/:productId)': handler
+                }
+            });
+
+            Backbone.history.start({pushState: true});
+
+            router.navigate('/stores/1', {
+                trigger: true
+            });
+
+            expect(handler).toHaveBeenCalledWith({
+                storeId: '1',
+                productId: null
             });
         });
 
@@ -57,7 +80,9 @@ define(function(require, exports, module) {
 
             Backbone.history.start({pushState: true});
 
-            router.navigate('/stores/0?storeId=1&productId=2');
+            router.navigate('/stores/0?storeId=1&productId=2', {
+                trigger: true
+            });
 
             expect(handler).toHaveBeenCalledWith({
                 storeId: '0',
@@ -77,7 +102,9 @@ define(function(require, exports, module) {
 
             Backbone.history.start({pushState: true});
 
-            router.navigate('/stores?test=1');
+            router.navigate('/stores?test=1', {
+                trigger: true
+            });
 
             expect(handler).toHaveBeenCalledWith({
                 test: '1'
