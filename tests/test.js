@@ -1,86 +1,86 @@
 define(function(require, exports, module) {
     //requirements
-    var router = require('../router');
+    var Router = require('router'),
+        Backbone = require('bower_components/backbone/backbone');
 
     describe('router common tests', function() {
 
         afterEach(function() {
-            router.routes = {};
-            router.stop();
+            Backbone.history.stop();
         });
 
         it('call root route', function() {
 
-            var root = jasmine.createSpy('root');
+            var handler = jasmine.createSpy('handler');
 
-            router.routes = {
-                '*path': root
-            };
+            new Router({
+                routes: {
+                    '*path': handler
+                }
+            });
 
-            router.start();
+            Backbone.history.start({pushState: true});
 
-            expect(root).toHaveBeenCalled();
+            expect(handler).toHaveBeenCalled();
         });
 
         it('call custom route', function() {
 
-            var route = jasmine.createSpy('route');
+            var handler = jasmine.createSpy('handler');
 
-            router.routes = {
-                'stores/:storeId/products/:productId': route
-            };
+            var router = new Router({
+                routes: {
+                    'stores/:storeId/products/:productId': handler,
+                    'test/:storeId/products/:productId': handler
+                }
+            });
 
-            router.start();
+            Backbone.history.start({pushState: true});
 
             router.navigate('/stores/1/products/2');
 
-            expect(route).toHaveBeenCalledWith({
-                params: {
-                    storeId: '1',
-                    productId: '2'
-                },
-                route: 'stores/:storeId/products/:productId'
+            expect(handler).toHaveBeenCalledWith({
+                storeId: '1',
+                productId: '2'
             });
         });
 
         it('call custom route with query params', function() {
 
-            var route = jasmine.createSpy('route');
+            var handler = jasmine.createSpy('handler');
 
-            router.routes = {
-                'stores/:storeId': route
-            };
+            var router = new Router({
+                routes: {
+                    'stores/:storeId': handler
+                }
+            });
 
-            router.start();
+            Backbone.history.start({pushState: true});
 
             router.navigate('/stores/0?storeId=1&productId=2');
 
-            expect(route).toHaveBeenCalledWith({
-                params: {
-                    storeId: '0',
-                    productId: '2'
-                },
-                route: 'stores/:storeId'
+            expect(handler).toHaveBeenCalledWith({
+                storeId: '0',
+                productId: '2'
             });
         });
 
         it('call route with query params only', function() {
 
-            var route = jasmine.createSpy('route');
+            var handler = jasmine.createSpy('handler');
 
-            router.routes = {
-                'stores(/)': route
-            };
+            var router = new Router({
+                routes: {
+                    'stores(/)': handler
+                }
+            });
 
-            router.start();
+            Backbone.history.start({pushState: true});
 
             router.navigate('/stores?test=1');
 
-            expect(route).toHaveBeenCalledWith({
-                params: {
-                    test: '1'
-                },
-                route: 'stores(/)'
+            expect(handler).toHaveBeenCalledWith({
+                test: '1'
             });
         });
 
