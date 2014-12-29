@@ -48,10 +48,12 @@ define(function(require, exports, module) {
 
             router.navigate({
                 storeId: 2,
-                productId: 4
+                productId: 4,
+                query: 'test'
             });
 
             expect(document.location.pathname).toEqual('/stores/2/products/4');
+            expect(document.location.search).toEqual('?query=test');
 
         });
 
@@ -67,14 +69,16 @@ define(function(require, exports, module) {
 
             Backbone.history.start({pushState: true});
 
-            router.navigate('/stores/1/products/2');
+            router.navigate('/stores/1/products/2?query=test');
 
             router.navigate({
                 storeId: 2,
-                productId: null
+                productId: null,
+                query: null
             });
 
             expect(document.location.pathname).toEqual('/stores/2');
+            expect(document.location.search).toEqual('');
 
         });
 

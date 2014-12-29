@@ -75,7 +75,7 @@ define(function(require) {
 
                     delete params[paramName];
 
-                    if (!param){
+                    if (param === null){
                         return '';
                     }
 
@@ -91,6 +91,10 @@ define(function(require) {
 
                     return param;
                 });
+
+            params = _.pick(params, function(value){
+                return value !== null;
+            });
 
             fragment = new Uri(fragment).setQuery(params).toString();
 
