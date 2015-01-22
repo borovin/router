@@ -70,6 +70,11 @@ define(function(require) {
 
             fragment = currentRoute
                 .replace(optionalParam, function(match){
+
+                    if (!match.match(namedParam)){
+                        return '';
+                    };
+
                     var paramName = match.match(namedParam)[0].substring(1),
                         param = params[paramName];
 

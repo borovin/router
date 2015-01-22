@@ -36,7 +36,7 @@ define(function(require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'stores/:storeId(/products/:productId)': function(){
+                    'stores/:storeId(/products/:productId)(/)': function(){
 
                     }
                 }
