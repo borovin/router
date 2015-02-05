@@ -1,7 +1,7 @@
 define(function(require) {
     //requirements
     var Uri = require('bower_components/uri.js/src/URI'),
-        _ = require('bower_components/lodash/dist/lodash'),
+        _ = require('bower_components/lodash/lodash'),
         makeClass = require('bower_components/makeClass/makeClass'),
         Backbone = require('bower_components/backbone/backbone');
 

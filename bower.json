@@ -1,38 +1,37 @@
 {
-    "name": "router",
-    "main": "router.js",
-    "authors": [
-        "Andrew Borovin <a@borovin.com>"
-    ],
-    "description": "extended backbone router",
-    "moduleType": [
-        "amd"
-    ],
-    "dependencies": {
-        "makeClass": "https://github.com/borovin/makeClass.git",
-
-        "uri.js": "~1.13",
-        "backbone": "~1.1.2",
-        "jquery": "~2.1.1",
-        "lodash": "~2.4.1",
-        "requirejs": "~2.1.15"
-    },
-    "keywords": [
-        "amd",
-        "requirejs",
-        "router"
-    ],
-    "license": "MIT",
-    "ignore": [
-        "**/.*",
-        "node_modules",
-        "bower_components",
-        "test",
-        "tests",
-        "path",
-        "example.html",
-        "karma.conf.js",
-        "package.json",
-        "karma.main.js"
-    ]
+  "name": "router",
+  "main": "router.js",
+  "authors": [
+    "Andrew Borovin <a@borovin.com>"
+  ],
+  "description": "extended backbone router",
+  "moduleType": [
+    "amd"
+  ],
+  "dependencies": {
+    "makeClass": "https://github.com/borovin/makeClass.git",
+    "uri.js": "~1.13",
+    "backbone": "~1.1.2",
+    "jquery": "~2.1.1",
+    "requirejs": "~2.1.15",
+    "lodash": "~3.1.0"
+  },
+  "keywords": [
+    "amd",
+    "requirejs",
+    "router"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests",
+    "path",
+    "example.html",
+    "karma.conf.js",
+    "package.json",
+    "karma.main.js"
+  ]
 }
