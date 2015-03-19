@@ -19,9 +19,28 @@ router - это AMD-модуль. Для использования необхо
 var router = require('bower_components/router/router');
 
 router({
-  '/path/to/page/:pageId': handler
+  '/path/to/page/:pageId': function(ctx){
+    console.log('page ' + ctx.params.pageId);
+  }
 });
 
-router.start()
+router.start();
+
+router('/path/to/page/1'); // page 1
+```
+
+Пути можно группировать:
+
+```javascript
+router({
+  '/company': {
+    '/about': aboutPage,
+    '/contacts': contactsPage,
+    '/projects': {
+      '/sites': sitesPage,
+      '/widgets': widgetsPage
+    }
+  }
+});
 ```
 
