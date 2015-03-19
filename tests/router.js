@@ -12,16 +12,32 @@ define(function(require, exports, module) {
 
             var ctxPathTemplate;
 
-            router('/test/:test', function(ctx){
+            router('/path/:test', function(ctx){
                 ctxPathTemplate = ctx.pathTemplate;
             });
 
             router.start();
 
-            router.show('/test/1');
+            router.show('/path/a');
 
-            expect(ctxPathTemplate).toEqual('/test/:test');
-            expect(router.currentPathTemplate).toEqual('/test/:test');
+            expect(ctxPathTemplate).toEqual('/path/:test');
+            expect(router.currentPathTemplate).toEqual('/path/:test');
+
+        });
+
+        it('Call route without params', function(){
+
+            var data;
+
+            router('/path', function(ctx){
+                data = ctx.data;
+            });
+
+            router.start();
+
+            router.show('/path');
+
+            expect(data).toEqual({});
 
         });
 
