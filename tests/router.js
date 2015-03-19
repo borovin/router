@@ -1,64 +1,95 @@
-define(function(require, exports, module) {
+define(function (require, exports, module) {
     //requirements
     var router = require('router');
 
-    describe(module.id, function() {
+    describe(module.id, function () {
 
-        afterEach(function() {
+        afterEach(function () {
             router.stop();
         });
 
-        it('Save path template to router and context', function(){
+        it('Call route', function () {
 
-            var ctxPathTemplate;
+            var handler = jasmine.createSpy('handler');
 
-            router('/path/:test', function(ctx){
-                ctxPathTemplate = ctx.pathTemplate;
+            router({
+                '/path': handler
             });
 
             router.start();
 
-            router.show('/path/a');
+            router('/path/');
 
-            expect(ctxPathTemplate).toEqual('/path/:test');
-            expect(router.currentPathTemplate).toEqual('/path/:test');
+            expect(handler).toHaveBeenCalled();
 
         });
 
-        it('Call route without params', function(){
+        it('Call nested route', function () {
 
-            var data;
+            var handler = jasmine.createSpy('handler');
 
-            router('/path', function(ctx){
-                data = ctx.data;
+            router({
+                '/path': {
+                    '/to': {
+                        '/page': handler
+                    }
+                }
             });
 
             router.start();
 
-            router.show('/path');
+            router('/path/to/page');
 
-            expect(data).toEqual({});
+            expect(handler).toHaveBeenCalled();
 
         });
 
-        it('Save all params to data', function(){
+        it('Merge params and query', function () {
 
-            var data;
+            var params;
 
-            router('/number/:number/string/:string/bool/:bool', function(ctx){
-                data = ctx.data;
+            router({
+                '/number/:number': {
+                    '/string/:string': {
+                        '/bool/:bool': function (ctx) {
+                            params = ctx.params;
+                        }
+                    }
+                }
             });
 
             router.start();
 
-            router.show('/number/1/string/a/bool/true?queryNumber=2&queryString=b&queryBool=false');
+            router('/number/1/string/a/bool/true?queryNumber=2&queryString=b&queryBool=false');
 
-            expect(data.number).toEqual(1);
-            expect(data.string).toEqual('a');
-            expect(data.bool).toEqual(true);
-            expect(data.queryNumber).toEqual(2);
-            expect(data.queryString).toEqual('b');
-            expect(data.queryBool).toEqual(false);
+            expect(params.number).toEqual(1);
+            expect(params.string).toEqual('a');
+            expect(params.bool).toEqual(true);
+            expect(params.queryNumber).toEqual(2);
+            expect(params.queryString).toEqual('b');
+            expect(params.queryBool).toEqual(false);
+
+        });
+
+        it('Change execute method', function () {
+
+            var handler = jasmine.createSpy('handler');
+
+            router.execute = function(ctx, handler){
+
+                handler('test');
+
+            };
+
+            router({
+                '/execute': handler
+            });
+
+            router.start();
+
+            router('/execute');
+
+            expect(handler).toHaveBeenCalledWith('test');
 
         });
     });

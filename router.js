@@ -4,44 +4,62 @@ define(function (require) {
         queryString = require('bower_components/query-string/query-string'),
         _ = require('bower_components/lodash/lodash');
 
-    var router = function(){
+    var router = function (routes, parentPathTemplate) {
 
-        var args = [].slice.call(arguments);
-
-        if (args.length >= 2){
-
-            args.splice(1, 0, function(ctx, next){
-
-                var data = _.extend(queryString.parse(ctx.querystring), ctx.params);
-
-                ctx.data = _.transform(data, function(result, data, key) {
-
-                    result[key] = data;
-
-                    if (data === 'true'){
-                        result[key] = true;
-                    }
-
-                    if (data === 'false'){
-                        result[key] = false;
-                    }
-
-                    if (!isNaN(Number(data))){
-                        result[key] = Number(data)
-                    }
-                });
-
-                router.currentPathTemplate = ctx.pathTemplate = args[0];
-
-                next();
-            });
+        if (!_.isPlainObject(routes)) {
+            return page.apply(null, arguments);
         }
 
-        return page.apply(null, args);
+        parentPathTemplate = parentPathTemplate || '';
+
+        _.forEach(routes, function (handler, pathTemplate) {
+
+            pathTemplate = parentPathTemplate + pathTemplate;
+
+            if (typeof handler === 'function') {
+                page(pathTemplate, function (ctx) {
+
+                    _.extend(ctx, {
+                        pathTemplate: pathTemplate,
+                        params: _.extend(queryString.parse(ctx.querystring), ctx.params)
+                    });
+
+                    ctx.params = _.transform(ctx.params, function (result, data, key) {
+
+                        result[key] = data;
+
+                        if (data === 'true') {
+                            result[key] = true;
+                        }
+
+                        if (data === 'false') {
+                            result[key] = false;
+                        }
+
+                        if (!isNaN(Number(data))) {
+                            result[key] = Number(data)
+                        }
+                    });
+
+                    router.execute(ctx, handler);
+                });
+            } else {
+
+                router(handler, pathTemplate);
+
+            }
+
+        });
 
     };
 
     _.extend(router, page);
+
+    router.execute = function (ctx, handler) {
+
+        handler(ctx);
+
+    };
 
     return router;
 });
