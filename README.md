@@ -49,6 +49,7 @@ router({
 
 router.start();
 
+router('/company/about'); // /company/about
 router('/company/projects/sites'); // /company/projects/sites
 ```
 
