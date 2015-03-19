@@ -32,15 +32,23 @@ router('/path/to/page/1'); // page 1
 Пути можно группировать:
 
 ```javascript
+var page = function(ctx){
+  console.log(ctx.path);
+}
+
 router({
   '/company': {
-    '/about': aboutPage,
-    '/contacts': contactsPage,
+    '/about': page,
+    '/contacts': page,
     '/projects': {
-      '/sites': sitesPage,
-      '/widgets': widgetsPage
+      '/sites': page,
+      '/widgets': page
     }
   }
 });
+
+router.start();
+
+router('/company/projects/sites'); // /company/projects/sites
 ```
 
