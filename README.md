@@ -13,12 +13,14 @@ bower install git@github.com:borovin/router.git
 Usage
 -----
 
-router - это AMD-модуль. Для использования необходим require.js или подобный AMD-загрузчик
+router - это AMD-модуль. Для использования необходим require.js или подобный AMD-загрузчик.
+
+router отличается от page.js одним методом .list(routes), который принимает список путей для обработки.
 
 ```javascript
 var router = require('bower_components/router/router');
 
-router({
+router.list({
   '/path/to/page/:pageId': function(ctx){
     console.log('page ' + ctx.params.pageId);
   }
@@ -36,7 +38,7 @@ var page = function(ctx){
   console.log(ctx.path);
 }
 
-router({
+router.list({
   '/company': {
     '/about': page,
     '/contacts': page,
