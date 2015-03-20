@@ -12,7 +12,7 @@ define(function (require, exports, module) {
 
             var handler = jasmine.createSpy('handler');
 
-            router({
+            router.list({
                 '/path': handler
             });
 
@@ -28,7 +28,7 @@ define(function (require, exports, module) {
 
             var handler = jasmine.createSpy('handler');
 
-            router({
+            router.list({
                 '/path': {
                     '/to': {
                         '/page': handler
@@ -48,7 +48,7 @@ define(function (require, exports, module) {
 
             var params;
 
-            router({
+            router.list({
                 '/number/:number': {
                     '/string/:string': {
                         '/bool/:bool': function (ctx) {
@@ -71,26 +71,5 @@ define(function (require, exports, module) {
 
         });
 
-        it('Change execute method', function () {
-
-            var handler = jasmine.createSpy('handler');
-
-            router.execute = function(ctx, handler){
-
-                handler('test');
-
-            };
-
-            router({
-                '/execute': handler
-            });
-
-            router.start();
-
-            router('/execute');
-
-            expect(handler).toHaveBeenCalledWith('test');
-
-        });
     });
 });

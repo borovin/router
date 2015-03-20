@@ -4,7 +4,9 @@ define(function (require) {
         queryString = require('bower_components/query-string/query-string'),
         _ = require('bower_components/lodash/lodash');
 
-    var router = function (routes, parentPathTemplate) {
+    var router = page;
+
+    router.list = function (routes, parentPathTemplate) {
 
         if (!_.isPlainObject(routes)) {
             return page.apply(null, arguments);
@@ -41,23 +43,15 @@ define(function (require) {
                         }
                     });
 
-                    router.execute(ctx, handler);
+                    handler(ctx);
                 });
             } else {
 
-                router(handler, pathTemplate);
+                router.list(handler, pathTemplate);
 
             }
 
         });
-
-    };
-
-    _.extend(router, page);
-
-    router.execute = function (ctx, handler) {
-
-        handler(ctx);
 
     };
 
