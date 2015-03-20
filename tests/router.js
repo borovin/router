@@ -6,9 +6,24 @@ define(function (require, exports, module) {
 
         afterEach(function () {
             router.stop();
+            router.clear();
         });
 
-        it('Call route', function () {
+        it('Register route path', function () {
+
+            var handler = jasmine.createSpy('handler');
+
+            router.path('/path', handler);
+
+            router.start();
+
+            router.navigate('/path/');
+
+            expect(handler).toHaveBeenCalled();
+
+        });
+
+        it('Register routes list', function () {
 
             var handler = jasmine.createSpy('handler');
 
@@ -18,13 +33,13 @@ define(function (require, exports, module) {
 
             router.start();
 
-            router('/path/');
+            router.navigate('/path/');
 
             expect(handler).toHaveBeenCalled();
 
         });
 
-        it('Call nested route', function () {
+        it('Register routes nested list', function () {
 
             var handler = jasmine.createSpy('handler');
 
@@ -38,7 +53,7 @@ define(function (require, exports, module) {
 
             router.start();
 
-            router('/path/to/page');
+            router.navigate('/path/to/page');
 
             expect(handler).toHaveBeenCalled();
 
@@ -60,7 +75,7 @@ define(function (require, exports, module) {
 
             router.start();
 
-            router('/number/1/string/a/bool/true?queryNumber=2&queryString=b&queryBool=false');
+            router.navigate('/number/1/string/a/bool/true?queryNumber=2&queryString=b&queryBool=false');
 
             expect(params.number).toEqual(1);
             expect(params.string).toEqual('a');
