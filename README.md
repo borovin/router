@@ -13,7 +13,7 @@ router - это AMD-модуль. Для использования необхо
 ```javascript
 var router = require('bower_components/router/router');
 
-router.list({
+router.setRoutes({
   '/path/to/page/:pageId': function(ctx){
     console.log('page ' + ctx.params.pageId);
   }
@@ -31,7 +31,7 @@ var page = function(ctx){
   console.log(ctx.path);
 }
 
-router.list({
+router.setRoutes({
   '/company': {
     '/about': page,
     '/contacts': page,
