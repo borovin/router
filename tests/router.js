@@ -13,7 +13,7 @@ define(function (require, exports, module) {
 
             var handler = jasmine.createSpy('handler');
 
-            router.path('/path', handler);
+            router.setRoute('/path', handler);
 
             router.start();
 
@@ -27,7 +27,7 @@ define(function (require, exports, module) {
 
             var handler = jasmine.createSpy('handler');
 
-            router.list({
+            router.setRoutes({
                 '/path': handler
             });
 
@@ -43,7 +43,7 @@ define(function (require, exports, module) {
 
             var handler = jasmine.createSpy('handler');
 
-            router.list({
+            router.setRoutes({
                 '/path': {
                     '/to': {
                         '/page': handler
@@ -63,7 +63,7 @@ define(function (require, exports, module) {
 
             var params;
 
-            router.list({
+            router.setRoutes({
                 '/number/:number': {
                     '/string/:string': {
                         '/bool/:bool': function (ctx) {

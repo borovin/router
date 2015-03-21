@@ -43,7 +43,7 @@ define(function (require, exports, module) {
         page.show(path);
     };
 
-    router.list = function (routes, parentPathTemplate) {
+    router.setRoutes = function (routes, parentPathTemplate) {
 
         if (!_.isPlainObject(routes)) {
             return page.apply(null, arguments);
@@ -57,11 +57,11 @@ define(function (require, exports, module) {
 
             if (typeof handler === 'function') {
 
-                router.path(pathTemplate, handler);
+                router.setRoute(pathTemplate, handler);
 
             } else {
 
-                router.list(handler, pathTemplate);
+                router.setRoutes(handler, pathTemplate);
 
             }
 
@@ -69,7 +69,7 @@ define(function (require, exports, module) {
 
     };
 
-    router.path = function (pathTemplate, handler) {
+    router.setRoute = function (pathTemplate, handler) {
 
         page(pathTemplate, function (ctx) {
 
