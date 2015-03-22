@@ -1,9 +1,3 @@
-if (typeof exports === 'object' && typeof define !== 'function') {
-    var define = function (factory) {
-        factory(require, exports, module);
-    };
-}
-
 define(function (require, exports, module) {
 
     var page = require('bower_components/page.js/page'),
