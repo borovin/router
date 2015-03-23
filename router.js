@@ -67,12 +67,12 @@ define(function (require, exports, module) {
 
         page(pathTemplate, function (ctx) {
 
-            _.extend(ctx, {
+            var context = {
                 pathTemplate: pathTemplate,
                 params: _.extend(queryString.parse(ctx.querystring), ctx.params)
-            });
+            };
 
-            ctx.params = _.transform(ctx.params, function (result, data, key) {
+            context.params = _.transform(context.params, function (result, data, key) {
 
                 result[key] = data;
 
@@ -89,7 +89,7 @@ define(function (require, exports, module) {
                 }
             });
 
-            handler(ctx);
+            handler(context);
         });
 
     };
