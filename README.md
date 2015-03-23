@@ -1,4 +1,6 @@
-installation
+Client-side router inspired by [page.js](http://visionmedia.github.io/page.js/), [director](https://github.com/flatiron/director) and [Backbone.Router](http://backbonejs.org/#Router)
+
+Installation
 ------------
 
 ```
