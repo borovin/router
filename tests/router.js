@@ -59,7 +59,7 @@ define(function (require, exports, module) {
 
         });
 
-        it('Merge params and query', function () {
+        it('Merge pathparams and queryparams', function () {
 
             var params;
 
@@ -83,6 +83,22 @@ define(function (require, exports, module) {
             expect(params.queryNumber).toEqual(2);
             expect(params.queryString).toEqual('b');
             expect(params.queryBool).toEqual(false);
+
+        });
+
+        it('Context has pathTemplate', function(){
+
+            var context;
+
+            router.setRoute('/page/:id', function(ctx){
+                context = ctx;
+            });
+
+            router.start();
+
+            router.navigate('/page/1');
+
+            expect(context.pathTemplate).toEqual('/page/:id');
 
         });
 
