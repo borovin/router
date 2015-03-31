@@ -15,7 +15,7 @@ define(function (require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'path': handler
+                    'path(/)': handler
                 }
             });
 
@@ -39,10 +39,10 @@ define(function (require, exports, module) {
                 routes: {
                     'path': {
                         '/to': {
-                            '/page1': page1,
-                            '/page2': page2
+                            '/page1(/)': page1,
+                            '/page2(/)': page2
                         },
-                        '/end': end
+                        '/end(/)': end
                     }
                 }
             });
@@ -67,7 +67,7 @@ define(function (require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'path/:param(/:option)': function(params){
+                    'path/:param(/:option)(/)': function(params){
                         result = params;
                     }
                 }
@@ -97,7 +97,7 @@ define(function (require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'path/:param(/:option)': function(params){
+                    'path/:param(/:option)(/)': function(params){
                         result = params;
                     }
                 }
@@ -127,7 +127,7 @@ define(function (require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'path/:param(/:option)': function(params){
+                    'path/:param(/:option)(/)': function(params){
                         result = params;
                     }
                 }
@@ -155,7 +155,7 @@ define(function (require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'path/:param': function(){}
+                    'path/:param(/:option)(/)': function(){}
                 }
             });
 
@@ -167,10 +167,19 @@ define(function (require, exports, module) {
 
             router.navigate({
                 param: 'b',
-                query: 'c'
+                query: 'b'
             });
 
             expect(location.pathname).toBe('/path/b');
+            expect(location.search).toBe('?query=b');
+
+            router.navigate({
+                param: 'c',
+                option: 'c',
+                query: 'c'
+            });
+
+            expect(location.pathname).toBe('/path/c/c');
             expect(location.search).toBe('?query=c');
 
         });

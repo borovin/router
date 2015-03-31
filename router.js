@@ -48,7 +48,8 @@ define(function (require) {
         },
         _extractParameters: function (routeRegExp, fragment) {
 
-            var pathName = fragment.split('?')[0],
+            var router = this,
+                pathName = fragment.split('?')[0],
                 query = fragment.split('?')[1],
                 queryParams = queryString.parse(query),
                 params = routeRegExp.exec(pathName).slice(1),
@@ -58,7 +59,7 @@ define(function (require) {
 
             _.find(this.routes, function (value, key) {
 
-                if (routeRegExp.test(key)) {
+                if (router._routeToRegExp(key).test(fragment)) {
 
                     paramNames = _.map(key.match(namedParamRegExp), function (name) {
                         return name.substring(1);
@@ -70,7 +71,7 @@ define(function (require) {
 
             _.forEach(params, function (param, index) {
 
-                if (typeof param === 'undefined') {
+                if (typeof param === 'undefined' || typeof paramNames[index] === 'undefined') {
                     return;
                 }
 
@@ -136,27 +137,30 @@ define(function (require) {
             params = _.extend({}, currentParams, params);
 
             fragment = currentRoute
-                .replace(optionalParamRegExp, function (match) {
+                .replace(optionalParamRegExp, function(match){
 
-                    if (!match.match(namedParamRegExp)) {
+                    var paramName = match.match(namedParamRegExp);
+
+                    if (paramName){
+                        paramName = paramName[0].substring(1);
+                    } else {
                         return '';
                     }
 
-                    var paramName = match.match(namedParam)[0].substring(1),
-                        param = params[paramName];
+                    var param = params[paramName];
 
                     delete params[paramName];
 
-                    if (param === null) {
+                    if (typeof param === 'undefined' || param === null) {
                         return '';
+                    } else {
+                        return match.replace(namedParamRegExp, param).replace(bracketsRegExp, '');
                     }
 
-                    return match
-                        .replace(bracketsRegExp, '')
-                        .replace(namedParamRegExp, param);
                 })
                 .replace(namedParamRegExp, function (match) {
-                    var paramName = match.match(namedParamRegExp)[0].substring(1),
+
+                    var paramName = match.substring(1),
                         param = params[paramName];
 
                     delete params[paramName];
