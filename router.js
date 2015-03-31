@@ -9,22 +9,22 @@ define(function (require) {
 
     // Cached regular expressions for matching named param parts and splatted
     // parts of route strings.
-    var optionalParam = /\((.*?)\)/g;
-    var brackets = /\(|\)/g;
+    var optionalParamRegExp = /\((.*?)\)/g;
+    var bracketsRegExp = /\(|\)/g;
     var namedParamRegExp = /(\(\?)?:\w+/g;
 
-    function expand(prefix, object){
+    function expand(prefix, object) {
 
         var result = {};
 
-        if (typeof prefix !== 'string'){
+        if (typeof prefix !== 'string') {
             object = prefix;
             prefix = '';
         }
 
-        _.forEach(object, function(value, key){
+        _.forEach(object, function (value, key) {
 
-            if (_.isPlainObject(value)){
+            if (_.isPlainObject(value)) {
                 _.extend(result, expand(prefix + key, value));
             } else {
                 result[prefix + key] = value;
@@ -46,7 +46,7 @@ define(function (require) {
             Router.apply(this, arguments);
 
         },
-        _extractParameters: function(routeRegExp, fragment) {
+        _extractParameters: function (routeRegExp, fragment) {
 
             var pathName = fragment.split('?')[0],
                 query = fragment.split('?')[1],
@@ -56,11 +56,11 @@ define(function (require) {
                 namedParams = {},
                 result;
 
-            _.find(this.routes, function(value, key) {
+            _.find(this.routes, function (value, key) {
 
                 if (routeRegExp.test(key)) {
 
-                    paramNames = _.map(key.match(namedParamRegExp), function(name) {
+                    paramNames = _.map(key.match(namedParamRegExp), function (name) {
                         return name.substring(1);
                     });
 
@@ -68,9 +68,9 @@ define(function (require) {
                 }
             });
 
-            _.forEach(params, function(param, index){
+            _.forEach(params, function (param, index) {
 
-                if (typeof param === 'undefined'){
+                if (typeof param === 'undefined') {
                     return;
                 }
 
@@ -78,7 +78,7 @@ define(function (require) {
 
             });
 
-            result = _.mapValues(_.extend(queryParams, namedParams), function(value){
+            result = _.mapValues(_.extend(queryParams, namedParams), function (value) {
 
                 if (value === 'true') {
                     return true;
@@ -98,15 +98,79 @@ define(function (require) {
 
             return [result];
         },
-        navigate: function(fragment, options){
+        navigate: function (fragment, options) {
 
             options = _.extend({
                 trigger: true,
                 replace: false
             }, options);
 
+            if (_.isPlainObject(fragment)) {
+                fragment = this.generateFragment(fragment)
+            }
+
             return Router.prototype.navigate.call(this, fragment, options);
 
+        },
+        generateFragment: function (params) {
+
+            var router = this,
+                routeRegExp,
+                currentRoute,
+                currentParams,
+                fragment;
+
+            _.any(this.routes, function (value, key) {
+
+                var regExp = router._routeToRegExp(key);
+
+                if (regExp.test(Backbone.history.fragment)) {
+                    routeRegExp = regExp;
+                    currentRoute = key;
+                    return true;
+                }
+            });
+
+            currentParams = router._extractParameters(routeRegExp, Backbone.history.fragment)[0];
+
+            params = _.extend({}, currentParams, params);
+
+            fragment = currentRoute
+                .replace(optionalParamRegExp, function (match) {
+
+                    if (!match.match(namedParamRegExp)) {
+                        return '';
+                    }
+
+                    var paramName = match.match(namedParam)[0].substring(1),
+                        param = params[paramName];
+
+                    delete params[paramName];
+
+                    if (param === null) {
+                        return '';
+                    }
+
+                    return match
+                        .replace(bracketsRegExp, '')
+                        .replace(namedParamRegExp, param);
+                })
+                .replace(namedParamRegExp, function (match) {
+                    var paramName = match.match(namedParamRegExp)[0].substring(1),
+                        param = params[paramName];
+
+                    delete params[paramName];
+
+                    return param;
+                });
+
+            params = _.pick(params, function (value) {
+                return value !== null;
+            });
+
+            fragment = fragment + '?' + queryString.stringify(params);
+
+            return fragment;
         }
     });
 });

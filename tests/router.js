@@ -19,11 +19,11 @@ define(function (require, exports, module) {
                 }
             });
 
-            Backbone.history.start();
-
-            router.navigate('/path', {
-                trigger: true
+            Backbone.history.start({
+                pushState: true
             });
+
+            router.navigate('/path');
 
             expect(handler).toHaveBeenCalled();
 
@@ -47,7 +47,9 @@ define(function (require, exports, module) {
                 }
             });
 
-            Backbone.history.start();
+            Backbone.history.start({
+                pushState: true
+            });
 
             router.navigate('/path/to/page1');
             router.navigate('/path/to/page2');
@@ -146,6 +148,30 @@ define(function (require, exports, module) {
             expect(result.param).toBe(true);
             expect(result.query).toBe(false);
             expect(result.option).toBe(false);
+
+        });
+
+        it('Navigate to route by params', function(){
+
+            var router = new Router({
+                routes: {
+                    'path/:param': function(){}
+                }
+            });
+
+            Backbone.history.start({
+                pushState: true
+            });
+
+            router.navigate('/path/a');
+
+            router.navigate({
+                param: 'b',
+                query: 'c'
+            });
+
+            expect(location.pathname).toBe('/path/b');
+            expect(location.search).toBe('?query=c');
 
         });
 
