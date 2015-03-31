@@ -1,98 +1,112 @@
-define(function (require, exports, module) {
-
-    var page = require('bower_components/page.js/page'),
+define(function (require) {
+    //requirements
+    var _ = require('bower_components/lodash/lodash'),
         queryString = require('bower_components/query-string/query-string'),
-        _ = require('bower_components/lodash/lodash');
+        makeClass = require('bower_components/makeClass/makeClass'),
+        Backbone = require('bower_components/backbone/backbone');
 
-    var router = {};
+    var Router = Backbone.Router;
 
-    router.isStarted = false;
+    // Cached regular expressions for matching named param parts and splatted
+    // parts of route strings.
+    var optionalParam = /\((.*?)\)/g;
+    var brackets = /\(|\)/g;
+    var namedParamRegExp = /(\(\?)?:\w+/g;
 
-    router.start = function (options) {
+    function expand(prefix, object){
 
-        router.isStarted = true;
+        var result = {};
 
-        page.start(options);
-    };
-
-    router.stop = function () {
-
-        router.isStarted = false;
-
-        page.stop();
-    };
-
-    router.clear = function () {
-
-        page.callbacks = [];
-    };
-
-    router.navigate = function (path, options) {
-
-        options = _.extend({
-            trigger: true,
-            replace: false
-        }, options);
-
-        page.show(path);
-    };
-
-    router.setRoutes = function (routes, parentPathTemplate) {
-
-        if (!_.isPlainObject(routes)) {
-            return page.apply(null, arguments);
+        if (typeof prefix !== 'string'){
+            object = prefix;
+            prefix = '';
         }
 
-        parentPathTemplate = parentPathTemplate || '';
+        _.forEach(object, function(value, key){
 
-        _.forEach(routes, function (handler, pathTemplate) {
-
-            pathTemplate = parentPathTemplate + pathTemplate;
-
-            if (typeof handler === 'function') {
-
-                router.setRoute(pathTemplate, handler);
-
+            if (_.isPlainObject(value)){
+                _.extend(result, expand(prefix + key, value));
             } else {
-
-                router.setRoutes(handler, pathTemplate);
-
+                result[prefix + key] = value;
             }
 
         });
 
-    };
+        return result;
 
-    router.setRoute = function (pathTemplate, handler) {
+    }
 
-        page(pathTemplate, function (ctx) {
+    return makeClass(Router, {
+        constructor: function (options) {
 
-            _.extend(ctx, {
-                pathTemplate: pathTemplate,
-                params: _.extend(queryString.parse(ctx.querystring), ctx.params)
+            options || (options = {});
+
+            options.routes = expand(options.routes);
+
+            Router.apply(this, arguments);
+
+        },
+        _extractParameters: function(routeRegExp, fragment) {
+
+            var pathName = fragment.split('?')[0],
+                query = fragment.split('?')[1],
+                queryParams = queryString.parse(query),
+                params = routeRegExp.exec(pathName).slice(1),
+                paramNames = [],
+                namedParams = {},
+                result;
+
+            _.find(this.routes, function(value, key) {
+
+                if (routeRegExp.test(key)) {
+
+                    paramNames = _.map(key.match(namedParamRegExp), function(name) {
+                        return name.substring(1);
+                    });
+
+                    return true;
+                }
             });
 
-            ctx.params = _.transform(ctx.params, function (result, data, key) {
+            _.forEach(params, function(param, index){
 
-                result[key] = data;
-
-                if (data === 'true') {
-                    result[key] = true;
+                if (typeof param === 'undefined'){
+                    return;
                 }
 
-                if (data === 'false') {
-                    result[key] = false;
-                }
+                namedParams[paramNames[index]] = param;
 
-                if (!_.isNaN(Number(data))) {
-                    result[key] = Number(data)
-                }
             });
 
-            handler(ctx);
-        });
+            result = _.mapValues(_.extend(queryParams, namedParams), function(value){
 
-    };
+                if (value === 'true') {
+                    return true;
+                }
 
-    module.exports = router;
+                if (value === 'false') {
+                    return false;
+                }
+
+                if (!_.isNaN(Number(value))) {
+                    return Number(value)
+                }
+
+                return value;
+
+            });
+
+            return [result];
+        },
+        navigate: function(fragment, options){
+
+            options = _.extend({
+                trigger: true,
+                replace: false
+            }, options);
+
+            return Router.prototype.navigate.call(this, fragment, options);
+
+        }
+    });
 });
