@@ -4,7 +4,7 @@ Installation
 ------------
 
 ```
-bower install git@github.com:borovin/router.git
+bower install https://github.com/borovin/router.git
 ```
 
 Usage
