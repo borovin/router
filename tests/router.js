@@ -67,8 +67,8 @@ define(function (require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'path/:param(/:option)(/)': function(params){
-                        result = params;
+                    'path/:param(/:option)(/)': function(ctx){
+                        result = ctx.params;
                     }
                 }
             });
@@ -97,8 +97,8 @@ define(function (require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'path/:param(/:option)(/)': function(params){
-                        result = params;
+                    'path/:param(/:option)(/)': function(ctx){
+                        result = ctx.params;
                     }
                 }
             });
@@ -127,8 +127,8 @@ define(function (require, exports, module) {
 
             var router = new Router({
                 routes: {
-                    'path/:param(/:option)(/)': function(params){
-                        result = params;
+                    'path/:param(/:option)(/)': function(ctx){
+                        result = ctx.params;
                     }
                 }
             });

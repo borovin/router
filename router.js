@@ -99,6 +99,13 @@ define(function (require) {
 
             return [result];
         },
+        execute: function(handler, params){
+
+            handler && handler.call(this, {
+                params: params[0]
+            })
+
+        },
         navigate: function (fragment, options) {
 
             options = _.extend({
