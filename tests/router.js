@@ -1,104 +1,186 @@
 define(function (require, exports, module) {
     //requirements
-    var router = require('router');
+    var Router = require('router'),
+        Backbone = require('bower_components/backbone/backbone');
 
     describe(module.id, function () {
 
         afterEach(function () {
-            router.stop();
-            router.clear();
+            Backbone.history.stop();
         });
 
-        it('Register route path', function () {
+        it('Register route', function(){
 
             var handler = jasmine.createSpy('handler');
 
-            router.setRoute('/path', handler);
-
-            router.start();
-
-            router.navigate('/path/');
-
-            expect(handler).toHaveBeenCalled();
-
-        });
-
-        it('Register routes list', function () {
-
-            var handler = jasmine.createSpy('handler');
-
-            router.setRoutes({
-                '/path': handler
+            var router = new Router({
+                routes: {
+                    'path(/)': handler
+                }
             });
 
-            router.start();
+            Backbone.history.start({
+                pushState: true
+            });
 
-            router.navigate('/path/');
+            router.navigate('/path');
 
             expect(handler).toHaveBeenCalled();
 
         });
 
-        it('Register routes nested list', function () {
+        it('Register nested routes', function(){
 
-            var handler = jasmine.createSpy('handler');
+            var page1 = jasmine.createSpy('page1'),
+                page2 = jasmine.createSpy('page2'),
+                end = jasmine.createSpy('end');
 
-            router.setRoutes({
-                '/path': {
-                    '/to': {
-                        '/page': handler
+            var router = new Router({
+                routes: {
+                    'path': {
+                        '/to': {
+                            '/page1(/)': page1,
+                            '/page2(/)': page2
+                        },
+                        '/end(/)': end
                     }
                 }
             });
 
-            router.start();
+            Backbone.history.start({
+                pushState: true
+            });
 
-            router.navigate('/path/to/page');
+            router.navigate('/path/to/page1');
+            router.navigate('/path/to/page2');
+            router.navigate('/path/end');
 
-            expect(handler).toHaveBeenCalled();
+            expect(page1).toHaveBeenCalled();
+            expect(page2).toHaveBeenCalled();
+            expect(end).toHaveBeenCalled();
 
         });
 
-        it('Merge pathparams and queryparams', function () {
+        it('Register route with string param', function(){
 
-            var params;
+            var result;
 
-            router.setRoutes({
-                '/number/:number': {
-                    '/string/:string': {
-                        '/bool/:bool': function (ctx) {
-                            params = ctx.params;
-                        }
+            var router = new Router({
+                routes: {
+                    'path/:param(/:option)(/)': function(params){
+                        result = params;
                     }
                 }
             });
 
-            router.start();
+            Backbone.history.start({
+                pushState: true
+            });
 
-            router.navigate('/number/1/string/a/bool/true?queryNumber=2&queryString=b&queryBool=false');
+            router.navigate('/path/a?query=a');
 
-            expect(params.number).toEqual(1);
-            expect(params.string).toEqual('a');
-            expect(params.bool).toEqual(true);
-            expect(params.queryNumber).toEqual(2);
-            expect(params.queryString).toEqual('b');
-            expect(params.queryBool).toEqual(false);
+            expect(result.param).toEqual('a');
+            expect(result.query).toEqual('a');
+            expect(result.option).toBeUndefined();
+
+            router.navigate('/path/b/b?query=b');
+
+            expect(result.param).toEqual('b');
+            expect(result.query).toEqual('b');
+            expect(result.option).toEqual('b');
 
         });
 
-        it('Context has pathTemplate', function(){
+        it('Register route with number param', function(){
 
-            var context;
+            var result;
 
-            router.setRoute('/page/:id', function(ctx){
-                context = ctx;
+            var router = new Router({
+                routes: {
+                    'path/:param(/:option)(/)': function(params){
+                        result = params;
+                    }
+                }
             });
 
-            router.start();
+            Backbone.history.start({
+                pushState: true
+            });
 
-            router.navigate('/page/1');
+            router.navigate('/path/1?query=1');
 
-            expect(context.pathTemplate).toEqual('/page/:id');
+            expect(result.param).toBe(1);
+            expect(result.query).toBe(1);
+            expect(result.option).toBeUndefined();
+
+            router.navigate('/path/2/2?query=2');
+
+            expect(result.param).toBe(2);
+            expect(result.query).toBe(2);
+            expect(result.option).toBe(2);
+
+        });
+
+        it('Register route with boolean param', function(){
+
+            var result;
+
+            var router = new Router({
+                routes: {
+                    'path/:param(/:option)(/)': function(params){
+                        result = params;
+                    }
+                }
+            });
+
+            Backbone.history.start({
+                pushState: true
+            });
+
+            router.navigate('/path/false?query=true');
+
+            expect(result.param).toBe(false);
+            expect(result.query).toBe(true);
+            expect(result.option).toBeUndefined();
+
+            router.navigate('/path/true/false?query=false');
+
+            expect(result.param).toBe(true);
+            expect(result.query).toBe(false);
+            expect(result.option).toBe(false);
+
+        });
+
+        it('Navigate to route by params', function(){
+
+            var router = new Router({
+                routes: {
+                    'path/:param(/:option)(/)': function(){}
+                }
+            });
+
+            Backbone.history.start({
+                pushState: true
+            });
+
+            router.navigate('/path/a');
+
+            router.navigate({
+                param: 'b',
+                query: 'b'
+            });
+
+            expect(location.pathname).toBe('/path/b');
+            expect(location.search).toBe('?query=b');
+
+            router.navigate({
+                param: 'c',
+                option: 'c',
+                query: 'c'
+            });
+
+            expect(location.pathname).toBe('/path/c/c');
+            expect(location.search).toBe('?query=c');
 
         });
 
