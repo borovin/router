@@ -11,6 +11,7 @@ define(function (require) {
     // parts of route strings.
     var optionalParamRegExp = /\((.*?)\)/g;
     var bracketsRegExp = /\(|\)/g;
+    var splatParam    = /\*\w+/g;
     var namedParamRegExp = /(\(\?)?:\w+/g;
 
     function expand(prefix, object) {
@@ -61,7 +62,7 @@ define(function (require) {
 
                 if (router._routeToRegExp(key).test(fragment)) {
 
-                    paramNames = _.map(key.match(namedParamRegExp), function (name) {
+                    paramNames = _.map(_.union(key.match(namedParamRegExp), key.match(splatParam)), function (name) {
                         return name.substring(1);
                     });
 

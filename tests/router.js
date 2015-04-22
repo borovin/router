@@ -151,6 +151,28 @@ define(function (require, exports, module) {
 
         });
 
+        it('Register route with path', function(){
+
+            var result;
+
+            var router = new Router({
+                routes: {
+                    'path/*path': function(ctx){
+                        result = ctx.params;
+                    }
+                }
+            });
+
+            Backbone.history.start({
+                pushState: true
+            });
+
+            router.navigate('/path/to/some/file');
+
+            expect(result.path).toBe('to/some/file');
+
+        });
+
         it('Navigate to route by params', function(){
 
             var router = new Router({
