@@ -43,9 +43,7 @@ define(function (require) {
 
             options || (options = {});
 
-            options.routes = expand(options.routes);
-
-            deepExtend(this, options);
+            options.routes = expand(deepExtend({}, this.routes, options.routes));
 
             Router.apply(this, arguments);
 
