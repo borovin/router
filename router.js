@@ -3,6 +3,7 @@ define(function (require) {
     var _ = require('bower_components/lodash/lodash'),
         queryString = require('bower_components/query-string/query-string'),
         makeClass = require('bower_components/makeClass/makeClass'),
+        deepExtend = require('bower_components/deepExtend/deepExtend'),
         Backbone = require('bower_components/backbone/backbone');
 
     var Router = Backbone.Router;
@@ -43,6 +44,8 @@ define(function (require) {
             options || (options = {});
 
             options.routes = expand(options.routes);
+
+            deepExtend(this, options);
 
             Router.apply(this, arguments);
 
