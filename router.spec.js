@@ -1,7 +1,7 @@
 define(function (require, exports, module) {
     //requirements
-    var Router = require('router'),
-        Backbone = require('bower_components/backbone/backbone');
+    var Router = require('./router.js'),
+        Backbone = require('bower_components/backbone/backbone.js');
 
     describe(module.id, function () {
 
