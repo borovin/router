@@ -1,7 +1,7 @@
 define(function (require) {
     //requirements
     var _ = require('bower_components/lodash/lodash.js'),
-        queryString = require('bower_components/query-string/query-string.js'),
+        queryString = require('bower_components/query-string/index.js'),
         createClass = require('bower_components/createClass/createClass.js'),
         deepExtend = require('bower_components/deepExtend/deepExtend.js'),
         Backbone = require('backbone');

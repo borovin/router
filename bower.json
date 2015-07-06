@@ -13,7 +13,7 @@
     "deepExtend": "https://github.com/borovin/deepExtend.git#^1.0.0",
     "backbone": "^1.1.2",
     "jquery": "^2.1.1",
-    "query-string": "^1.0.0",
+    "query-string": "^2.0.0",
     "lodash": "^3.5.0"
   },
   "keywords": [
