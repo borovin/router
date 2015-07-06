@@ -4,7 +4,7 @@ define(function (require) {
         queryString = require('bower_components/query-string/query-string.js'),
         createClass = require('bower_components/createClass/createClass.js'),
         deepExtend = require('bower_components/deepExtend/deepExtend.js'),
-        Backbone = require('bower_components/backbone/backbone.js');
+        Backbone = require('backbone');
 
     var Router = Backbone.Router;
 
