@@ -2,7 +2,7 @@ machine:
   node:
     version: stable
   environment:
-    CODACY_REPO_TOKEN: f809561086874a3c89d2807e3df3104c
+    CODACY_REPO_TOKEN: 408f88ada989468586611c72ae941638
 
 dependencies:
   post:
