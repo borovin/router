@@ -1,189 +1,174 @@
-define(function (require) {
-    //requirements
-    var _ = require('bower_components/lodash/lodash.js'),
-        queryString = require('bower_components/query-string/index.js'),
-        createClass = require('bower_components/createClass/createClass.js'),
-        deepExtend = require('bower_components/deepExtend/deepExtend.js'),
-        Backbone = require('backbone');
+var _ = require('lodash');
+var $ = require('jquery');
+var qs = require('qs');
+var page404 = require('./404.ejs!ejsLoader');
 
-    var Router = Backbone.Router;
+var location = window.location;
+var history = window.history;
 
-    // Cached regular expressions for matching named param parts and splatted
-    // parts of route strings.
-    var optionalParamRegExp = /\((.*?)\)/g;
-    var bracketsRegExp = /\(|\)/g;
-    var splatParam    = /\*\w+/g;
-    var namedParamRegExp = /(\(\?)?:\w+/g;
+var router = {};
 
-    function expand(prefix, object) {
 
-        var result = {};
+/**
+ * Running flag.
+ */
 
-        if (typeof prefix !== 'string') {
-            object = prefix;
-            prefix = '';
-        }
+var running;
 
-        _.forEach(object, function (value, key) {
 
-            if (_.isPlainObject(value)) {
-                _.extend(result, expand(prefix + key, value));
-            } else {
-                result[prefix + key] = value;
-            }
+/**
+ * Handle "populate" events.
+ */
 
-        });
+var onpopstate = (function () {
 
-        return result;
+    var loaded = false;
 
+    if (typeof window === 'undefined') {
+        return;
     }
 
-    return createClass(Router, {
-        constructor: function (options) {
+    if (document.readyState === 'complete') {
+        loaded = true;
+    } else {
+        window.addEventListener('load', function () {
+            setTimeout(function () {
+                loaded = true;
+            }, 0);
+        });
+    }
 
-            options || (options = {});
+    return function () {
 
-            options.routes = expand(deepExtend({}, this.routes, options.routes));
-
-            Router.apply(this, arguments);
-
-        },
-        _extractParameters: function (routeRegExp, fragment) {
-
-            var router = this,
-                pathName = fragment.split('?')[0],
-                query = fragment.split('?')[1],
-                queryParams = queryString.parse(query),
-                params = routeRegExp.exec(pathName).slice(1),
-                paramNames = [],
-                namedParams = {},
-                result;
-
-            _.find(this.routes, function (value, key) {
-
-                if (router._routeToRegExp(key).test(fragment)) {
-
-                    paramNames = _.map(_.union(key.match(namedParamRegExp), key.match(splatParam)), function (name) {
-                        return name.substring(1);
-                    });
-
-                    return true;
-                }
-            });
-
-            _.forEach(params, function (param, index) {
-
-                if (typeof param === 'undefined' || typeof paramNames[index] === 'undefined') {
-                    return;
-                }
-
-                namedParams[paramNames[index]] = param;
-
-            });
-
-            result = _.mapValues(_.extend(queryParams, namedParams), function (value) {
-
-                if (value === 'true') {
-                    return true;
-                }
-
-                if (value === 'false') {
-                    return false;
-                }
-
-                if (!_.isNaN(Number(value))) {
-                    return Number(value)
-                }
-
-                return value;
-
-            });
-
-            return [result];
-        },
-        execute: function(handler, params){
-
-            handler && handler.call(this, {
-                params: params[0]
-            })
-
-        },
-        navigate: function (fragment, options) {
-
-            options = _.extend({
-                trigger: true,
-                replace: false
-            }, options);
-
-            if (_.isPlainObject(fragment)) {
-                fragment = this.generateFragment(fragment)
-            }
-
-            return Router.prototype.navigate.call(this, fragment, options);
-
-        },
-        generateFragment: function (params) {
-
-            var router = this,
-                routeRegExp,
-                currentRoute,
-                currentParams,
-                fragment;
-
-            _.any(this.routes, function (value, key) {
-
-                var regExp = router._routeToRegExp(key);
-
-                if (regExp.test(Backbone.history.fragment)) {
-                    routeRegExp = regExp;
-                    currentRoute = key;
-                    return true;
-                }
-            });
-
-            currentParams = router._extractParameters(routeRegExp, Backbone.history.fragment)[0];
-
-            params = _.extend({}, currentParams, params);
-
-            fragment = currentRoute
-                .replace(optionalParamRegExp, function(match){
-
-                    var paramName = match.match(namedParamRegExp);
-
-                    if (paramName){
-                        paramName = paramName[0].substring(1);
-                    } else {
-                        return '';
-                    }
-
-                    var param = params[paramName];
-
-                    delete params[paramName];
-
-                    if (typeof param === 'undefined' || param === null) {
-                        return '';
-                    } else {
-                        return match.replace(namedParamRegExp, param).replace(bracketsRegExp, '');
-                    }
-
-                })
-                .replace(namedParamRegExp, function (match) {
-
-                    var paramName = match.substring(1),
-                        param = params[paramName];
-
-                    delete params[paramName];
-
-                    return param;
-                });
-
-            params = _.pick(params, function (value) {
-                return value !== null;
-            });
-
-            fragment = fragment + '?' + queryString.stringify(params);
-
-            return fragment;
+        if (!loaded) {
+            return;
         }
+
+        router.navigate(location.pathname + location.search + location.hash, {
+            replace: true
+        });
+    };
+})();
+
+
+/**
+ * Handle "click" events.
+ */
+
+router.onClick = function (event) {
+
+    var element;
+    var link;
+
+    if (event.metaKey || event.ctrlKey || event.shiftKey) {
+        return;
+    }
+
+    if (event.defaultPrevented) {
+        return;
+    }
+
+    element = event.currentTarget;
+
+    // Ignore if tag has
+    // 1. "download" attribute
+    // 2. "target" attribute
+    // 3. rel="external" attribute
+    if (element.hasAttribute('download') ||
+        element.hasAttribute('target') ||
+        element.getAttribute('rel') === 'external') {
+        return;
+    }
+
+    link = element.getAttribute('href');
+
+    // Check for mailto: in the href
+    if (link && link.indexOf('mailto:') > -1) {
+        return;
+    }
+
+    if (link && link.indexOf('http') === 0) {
+        return;
+    }
+
+    event.preventDefault();
+
+    router.navigate(link);
+};
+
+/**
+ * Start navigation.
+ *
+ * @api public
+ */
+
+router.start = function () {
+
+    var url;
+
+    if (running) {
+        return;
+    }
+
+    running = true;
+
+    $(window).on('popstate', onpopstate);
+    $(document).on('click', '[href]', router.onClick);
+
+    url = location.pathname + location.search + location.hash;
+
+    router.navigate(url, {
+        replace: true
     });
-});
+};
+
+
+router.navigate = function (url, options) {
+
+    options = _.defaults(options || {}, {
+        replace: false
+    });
+
+    history[options.replace ? 'replaceState' : 'pushState']({}, '', url);
+    router.current = url;
+
+    return router.loadPage(url).catch(router.renderError);
+
+};
+
+router.loadPage = function(url){
+
+    var pageUrl = ('pages' + url.split('?')[0] + '/index').split('//').join('/');
+
+    return System.import(pageUrl).then(function (Page) {
+        new Page();
+    });
+};
+
+router.renderError = function(error){
+    document.body.innerHTML = page404({
+        error: error
+    })
+};
+
+router.setParams = function (params) {
+
+    var currentQuery = qs.parse(document.location.search.substring(1));
+
+    _.extend(currentQuery, params);
+
+    window.history.replaceState({}, '', '?' + qs.stringify(currentQuery));
+
+};
+
+router.getParams = function () {
+
+    return qs.parse(document.location.search.substring(1));
+
+};
+
+router.extend = function(options){
+    return _.extend({}, router, options);
+};
+
+module.exports = router;

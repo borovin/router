@@ -1,0 +1,12 @@
+{
+  "extends": [
+    "eslint:recommended",
+    "yandex"
+  ],
+  "env": {
+    "node": true,
+    "commonjs": true,
+    "browser": true,
+    "jasmine": true
+  }
+}
