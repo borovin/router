@@ -15,11 +15,6 @@ var router = {};
 
 var running;
 
-
-/**
- * Handle "populate" events.
- */
-
 var onpopstate = (function () {
 
     var loaded = false;
@@ -73,10 +68,7 @@ router.onClick = function (event) {
     // Ignore if tag has
     // 1. "download" attribute
     // 2. "target" attribute
-    // 3. rel="external" attribute
-    if (element.hasAttribute('download') ||
-        element.hasAttribute('target') ||
-        element.getAttribute('rel') === 'external') {
+    if (element.hasAttribute('download') || element.hasAttribute('target')) {
         return;
     }
 
@@ -136,7 +128,7 @@ router.navigate = function (url, options) {
 
 };
 
-router.loadPage = function(url){
+router.loadPage = function (url) {
 
     var pageUrl = ('pages' + url.split('?')[0] + '/index').split('//').join('/');
 
@@ -145,13 +137,17 @@ router.loadPage = function(url){
     });
 };
 
-router.renderError = function(error){
+router.renderError = function (error) {
     document.body.innerHTML = page404({
         error: error
     })
 };
 
-router.setParams = function (params) {
+router.params = function (params) {
+
+    if (!params){
+        return qs.parse(document.location.search.substring(1));
+    }
 
     var currentQuery = qs.parse(document.location.search.substring(1));
 
@@ -161,13 +157,7 @@ router.setParams = function (params) {
 
 };
 
-router.getParams = function () {
-
-    return qs.parse(document.location.search.substring(1));
-
-};
-
-router.extend = function(options){
+router.extend = function (options) {
     return _.extend({}, router, options);
 };
 
