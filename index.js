@@ -1,164 +1,154 @@
-var _ = require('lodash');
-var $ = require('jquery');
-var qs = require('qs');
-var page404 = require('./404.ejs!ejsLoader');
+import { defaults, extend } from 'lodash-es';
+import $ from 'jquery';
+import qs from 'qs';
 
-var location = window.location;
-var history = window.history;
+let running = false;
+let loaded = false;
 
-var router = {};
+if (document.readyState === 'complete') {
+  loaded = true;
+} else {
+  window.addEventListener('load', () => {
+    setTimeout(() => {
+      loaded = true;
+    }, 0);
+  });
+}
 
+function onpopstate() {
+  if (!loaded) {
+    return;
+  }
 
-/**
- * Running flag.
- */
+  this.navigate(document.location.pathname + document.location.search + document.location.hash, {
+    replace: true,
+  });
+}
 
-var running;
+export default {
+  currentUrl: null,
+  currentPage: null,
+  baseUrl: '',
+  pagesRoot: 'pages',
 
-var onpopstate = (function () {
-
-    var loaded = false;
-
-    if (typeof window === 'undefined') {
-        return;
-    }
-
-    if (document.readyState === 'complete') {
-        loaded = true;
-    } else {
-        window.addEventListener('load', function () {
-            setTimeout(function () {
-                loaded = true;
-            }, 0);
-        });
-    }
-
-    return function () {
-
-        if (!loaded) {
-            return;
-        }
-
-        router.navigate(location.pathname + location.search + location.hash, {
-            replace: true
-        });
-    };
-})();
-
-
-/**
- * Handle "click" events.
- */
-
-router.onClick = function (event) {
-
-    var element;
-    var link;
+  onClick(event) {
+    const router = this;
 
     if (event.metaKey || event.ctrlKey || event.shiftKey) {
-        return;
+      return;
     }
 
     if (event.defaultPrevented) {
-        return;
+      return;
     }
 
-    element = event.currentTarget;
+    const element = event.currentTarget;
 
     // Ignore if tag has
     // 1. "download" attribute
     // 2. "target" attribute
     if (element.hasAttribute('download') || element.hasAttribute('target')) {
-        return;
+      return;
     }
 
-    link = element.getAttribute('href');
+    const link = element.getAttribute('href');
 
     // Check for mailto: in the href
     if (link && link.indexOf('mailto:') > -1) {
-        return;
+      return;
     }
 
     if (link && link.indexOf('http') === 0) {
-        return;
+      return;
     }
 
     event.preventDefault();
 
     router.navigate(link);
-};
+  },
 
-/**
- * Start navigation.
- *
- * @api public
- */
-
-router.start = function () {
-
-    var url;
+  start() {
+    const router = this;
 
     if (running) {
-        return;
+      return;
     }
 
     running = true;
 
     $(window).on('popstate', onpopstate);
-    $(document).on('click', '[href]', router.onClick);
+    $(document).on('click', '[href]', this.onClick);
 
-    url = location.pathname + location.search + location.hash;
+    const url = document.location.pathname + document.location.search + document.location.hash;
 
     router.navigate(url, {
-        replace: true
+      replace: true,
     });
-};
+  },
 
+  navigate(url, options) {
+    const router = this;
+    let normalizedUrl = url;
 
-router.navigate = function (url, options) {
-
-    options = _.defaults(options || {}, {
-        replace: false
-    });
-
-    history[options.replace ? 'replaceState' : 'pushState']({}, '', url);
-    router.current = url;
-
-    return router.loadPage(url).catch(router.renderError);
-
-};
-
-router.loadPage = function (url) {
-
-    var pageUrl = ('pages' + url.split('?')[0] + '/index').split('//').join('/');
-
-    return System.import(pageUrl).then(function (Page) {
-        new Page();
-    });
-};
-
-router.renderError = function (error) {
-    document.body.innerHTML = page404({
-        error: error
-    })
-};
-
-router.params = function (params) {
-
-    if (!params){
-        return qs.parse(document.location.search.substring(1));
+    if (normalizedUrl.indexOf(router.baseUrl) === 0) {
+      normalizedUrl = normalizedUrl.substr(router.baseUrl.length);
     }
 
-    var currentQuery = qs.parse(document.location.search.substring(1));
+    if (normalizedUrl === router.currentUrl) {
+      return false;
+    }
 
-    _.extend(currentQuery, params);
+    if (router.currentUrl && (router.currentUrl.split('#')[0] === normalizedUrl.split('#')[0])) {
+      return false;
+    }
 
-    window.history.replaceState({}, '', '?' + qs.stringify(currentQuery));
+    const opt = defaults(options || {}, {
+      replace: false,
+    });
 
+    window.history[opt.replace ? 'replaceState' : 'pushState']({}, '', normalizedUrl);
+
+    router.currentUrl = normalizedUrl;
+
+    return router.loadPage(normalizedUrl).catch(router.renderError);
+  },
+
+  loadPage(url) {
+    const router = this;
+    const pageUrl = (`${router.pagesRoot}${url.split('?')[0].split('#')[0]}/index`)
+      .split('//')
+      .join('/');
+
+    return System.import(pageUrl).then((Page) => {
+      router.currentPage = new Page();
+    });
+  },
+
+  renderError(error) {
+    document.body.innerHTML = error;
+  },
+
+  query(params) {
+    const router = this;
+
+    if (!params) {
+      return qs.parse(document.location.search.substring(1));
+    }
+
+    const currentQuery = qs.parse(document.location.search.substring(1));
+
+    extend(currentQuery, params);
+
+    const url = `${router.baseUrl}/${router.currentUrl}`.split('//').join('/');
+    const queryString = qs.stringify(currentQuery);
+
+    window.history.replaceState({}, '', `${url}?${queryString}`);
+
+    return queryString;
+  },
+
+  extend(options) {
+    const router = this;
+    return extend({}, router, options);
+  },
 };
-
-router.extend = function (options) {
-    return _.extend({}, router, options);
-};
-
-module.exports = router;
