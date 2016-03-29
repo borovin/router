@@ -3,20 +3,22 @@
   "version": "1.0.1",
   "main": "index.js",
   "scripts": {
-    "test": "node ./node_modules/testem/testem.js",
+    "start": "node app.js",
+    "test": "npm run testem-ci && npm run lint -s",
+    "testem": "node ./node_modules/testem/testem.js",
+    "testem-ci": "node ./node_modules/testem/testem.js ci -P 5",
     "lint": "node ./node_modules/eslint/bin/eslint.js ."
   },
   "devDependencies": {
-    "eslint": "^1.10.3",
-    "eslint-config-yandex": "^1.0.5",
+    "eslint": "^2.0.0",
+    "eslint-config-airbnb": "^6.0.2",
     "testem": "^1.2.2"
   },
   "dependencies": {
-    "ejsLoader": "github:borovin/ejsLoader",
-    "jquery": "^2.2.0",
-    "lodash": "^4.5.0",
+    "jquery": "^2.2.2",
+    "lodash-es": "^4.6.1",
     "qs": "^6.1.0",
-    "steal": "^0.13.2"
+    "steal": "^0.15.0"
   },
   "system": {
     "npmIgnore": [

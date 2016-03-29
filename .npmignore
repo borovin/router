@@ -1,8 +1,4 @@
-.travis.yml
-.eslintignore
-.eslintrc
 testem.js
-tests
-examples
-tools
 app.js
+_*
+.*

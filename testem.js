@@ -1,8 +1,7 @@
 /* eslint camelcase: 0 */
 
 module.exports = {
-    src_files: ['tests/*', 'block.js'],
-    serve_files: 'tests/*',
-    test_page: 'tools/testem.mustache',
-    launch_in_ci: ['PhantomJS']
+  src_files: ['_tests/*', 'index.js'],
+  serve_files: '_tests/*',
+  test_page: '_tools/testem.mustache',
 };
