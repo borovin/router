@@ -1,5 +1,4 @@
-import { defaults, extend } from 'lodash-es';
-import $ from 'jquery';
+import { defaults, extend, isElement } from 'lodash-es';
 import qs from 'qs';
 
 let running = false;
@@ -15,90 +14,85 @@ if (document.readyState === 'complete') {
   });
 }
 
-function onpopstate() {
-  if (!loaded) {
-    return;
-  }
-
-  this.navigate(document.location.pathname + document.location.search + document.location.hash, {
-    replace: true,
-  });
+function getCurrentUrl() {
+  return document.location.pathname + document.location.search + document.location.hash;
 }
 
-export default {
+const router = {
   currentUrl: null,
   currentPage: null,
   baseUrl: '',
   pagesRoot: 'pages',
 
-  onClick(event) {
-    const router = this;
-
-    if (event.metaKey || event.ctrlKey || event.shiftKey) {
+  onPopstate() {
+    if (!loaded) {
       return;
     }
 
-    if (event.defaultPrevented) {
-      return;
-    }
-
-    const element = event.currentTarget;
-
-    // Ignore if tag has
-    // 1. "download" attribute
-    // 2. "target" attribute
-    if (element.hasAttribute('download') || element.hasAttribute('target')) {
-      return;
-    }
-
-    const link = element.getAttribute('href');
-
-    // Check for mailto: in the href
-    if (link && link.indexOf('mailto:') > -1) {
-      return;
-    }
-
-    if (link && link.indexOf('http') === 0) {
-      return;
-    }
-
-    event.preventDefault();
-
-    router.navigate(link);
-  },
-
-  start() {
-    const router = this;
-
-    if (running) {
-      return;
-    }
-
-    running = true;
-
-    $(window).on('popstate', onpopstate);
-    $(document).on('click', '[href]', this.onClick);
-
-    const url = document.location.pathname + document.location.search + document.location.hash;
-
-    router.navigate(url, {
+    this.navigate(getCurrentUrl(), {
       replace: true,
     });
   },
 
-  navigate(url, options) {
-    const router = this;
-    let normalizedUrl = url;
+  onClick(e) {
+    if (this.checkLink(e.target)) {
+      e.preventDefault();
+      this.navigate(e.target.getAttribute('href'));
+    }
+  },
 
-    if (normalizedUrl.indexOf(router.baseUrl) === 0) {
-      normalizedUrl = normalizedUrl.substr(router.baseUrl.length);
+  checkLink(linkElement) {
+    let result = true;
+
+    if (!isElement(linkElement)) {
+      result = false;
     }
 
-    if (normalizedUrl === router.currentUrl) {
+    if (!linkElement.getAttribute('href')) {
+      result = false;
+    }
+
+    if (linkElement.getAttribute('rel') === 'external') {
+      result = false;
+    }
+
+    return result;
+  },
+
+  start() {
+    if (running) {
+      return Promise.resolve();
+    }
+
+    running = true;
+
+    window.addEventListener('popstate', this.onPopstate);
+    document.addEventListener('click', this.onClick);
+
+    return this.navigate(getCurrentUrl(), {
+      replace: true,
+    });
+  },
+
+  stop() {
+    running = false;
+
+    window.removeEventListener('popstate', this.onPopstate);
+    document.removeEventListener('click', this.onClick);
+  },
+
+  navigate(url, options) {
+    let normalizedUrl = url;
+
+    if (normalizedUrl.indexOf(this.baseUrl) === 0) {
+      normalizedUrl = normalizedUrl.substr(this.baseUrl.length);
+    }
+
+    if (normalizedUrl === this.currentUrl) {
       return false;
     }
 
-    if (router.currentUrl && (router.currentUrl.split('#')[0] === normalizedUrl.split('#')[0])) {
+    if (this.currentUrl && (this.currentUrl.split('#')[0] === normalizedUrl.split('#')[0])) {
       return false;
     }
 
@@ -108,19 +102,19 @@ export default {
 
     window.history[opt.replace ? 'replaceState' : 'pushState']({}, '', normalizedUrl);
 
-    router.currentUrl = normalizedUrl;
+    this.currentUrl = normalizedUrl;
 
-    return router.loadPage(normalizedUrl).catch(router.renderError);
+    return this.loadPage(normalizedUrl).catch(this.renderError);
   },
 
   loadPage(url) {
-    const router = this;
-    const pageUrl = (`${router.pagesRoot}${url.split('?')[0].split('#')[0]}/index`)
+    const pageUrl = (`${this.pagesRoot}${url.split('?')[0].split('#')[0]}/index`)
       .split('//')
       .join('/');
 
-    return System.import(pageUrl).then((Page) => {
-      router.currentPage = new Page();
+    return System.import(pageUrl).then((Module) => {
+      const Page = Module.default;
+      this.currentPage = new Page();
     });
   },
 
@@ -129,8 +123,6 @@ export default {
   },
 
   query(params) {
-    const router = this;
-
     if (!params) {
       return qs.parse(document.location.search.substring(1));
     }
@@ -139,16 +131,14 @@ export default {
 
     extend(currentQuery, params);
 
-    const url = `${router.baseUrl}/${router.currentUrl}`.split('//').join('/');
+    const url = `${this.baseUrl}/${this.currentUrl}`.split('//').join('/');
     const queryString = qs.stringify(currentQuery);
 
     window.history.replaceState({}, '', `${url}?${queryString}`);
 
     return queryString;
   },
-
-  extend(options) {
-    const router = this;
-    return extend({}, router, options);
-  },
 };
+
+export default router;
+
