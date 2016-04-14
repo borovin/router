@@ -1,4 +1,4 @@
-<h1>set <a target="_blank" href="https://travis-ci.org/borovin/router">
+<h1>router <a target="_blank" href="https://travis-ci.org/borovin/router">
 <img src="https://travis-ci.org/borovin/router.svg?branch=master"/></a> 
 <a target="_blank" href="https://david-dm.org/borovin/router">
 <img src="https://david-dm.org/borovin/router.svg"/>
