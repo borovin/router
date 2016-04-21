@@ -1,3 +1,5 @@
-export default function () {
-  this.name = 'test';
+export class Page {
+  constructor() {
+    this.name = 'test';
+  }
 }

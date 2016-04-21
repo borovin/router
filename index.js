@@ -113,8 +113,7 @@ const router = {
       .join('/');
 
     return System.import(pageUrl).then((Module) => {
-      const Page = Module.default;
-      this.currentPage = new Page();
+      this.currentPage = new Module.Page();
     });
   },
 
