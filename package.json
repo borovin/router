@@ -17,7 +17,7 @@
   "dependencies": {
     "lodash-es": "^4.6.1",
     "qs": "^6.1.0",
-    "steal": "^0.15.0"
+    "steal": "^0.16.0"
   },
   "system": {
     "npmIgnore": [
