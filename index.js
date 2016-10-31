@@ -1,10 +1,9 @@
-const qs = require('qs');
 const Route = require('route-parser');
 const defaults = require('lodash.defaults');
 const forEach = require('lodash.foreach');
 
 let running = false;
-let routePattern;
+//let routePattern;
 
 function getCurrentUrl() {
     return document.location.pathname + document.location.search + document.location.hash;
@@ -72,7 +71,7 @@ const router = {
             const params = parsedRoute.match(url.split('#')[0]);
 
             if (params) {
-                routePattern = pattern;
+                //routePattern = pattern;
                 routeHandler = handler;
                 routeParams = params;
 
@@ -85,11 +84,7 @@ const router = {
 
     onError(error) {
         document.body.innerHTML = error;
-    },
-
-    set(params, options) {},
-
-    get() {}
+    }
 };
 
 module.exports = router;

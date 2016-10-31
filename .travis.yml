@@ -26,3 +26,4 @@ deploy:
   skip_cleanup: true
   on:
       branch: master
+      condition: $TEST_TYPE = coverage

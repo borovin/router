@@ -8,5 +8,9 @@
     "commonjs": true,
     "browser": true,
     "jest": true
+  },
+  "globals": {
+    "Promise": true,
+    "System": true
   }
 }
