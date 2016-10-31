@@ -1,143 +1,96 @@
-import { defaults, extend, isElement } from 'lodash-es';
-import qs from 'qs';
+const qs = require('qs');
+const Route = require('route-parser');
+const defaults = require('lodash.defaults');
+const forEach = require('lodash.foreach');
 
 let running = false;
-let loaded = false;
-
-if (document.readyState === 'complete') {
-  loaded = true;
-} else {
-  window.addEventListener('load', () => {
-    setTimeout(() => {
-      loaded = true;
-    }, 0);
-  });
-}
+let routePattern;
 
 function getCurrentUrl() {
-  return document.location.pathname + document.location.search + document.location.hash;
+    return document.location.pathname + document.location.search + document.location.hash;
+}
+
+function loadPage(options) {
+    const url = options.pagePath;
+
+    const pageUrl = (`pages/${url.split('?')[0].split('#')[0]}/index`)
+        .split('//')
+        .join('/');
+
+    return window.System && Promise.resolve(System.import(pageUrl)).then(Page => Page());
 }
 
 const router = {
-  currentUrl: null,
-  currentPage: null,
-  baseUrl: '',
-  pagesRoot: 'pages',
+    onPopstate() {
+        this.navigate(getCurrentUrl(), {
+            replace: true,
+        });
+    },
 
-  onPopstate() {
-    if (!loaded) {
-      return;
-    }
+    routes: {},
 
-    this.navigate(getCurrentUrl(), {
-      replace: true,
-    });
-  },
+    start() {
+        if (running) {
+            return Promise.resolve();
+        }
 
-  onClick(e) {
-    if (this.checkLink(e.target)) {
-      e.preventDefault();
-      this.navigate(e.target.getAttribute('href'));
-    }
-  },
+        this.routes['*pagePath'] = loadPage;
 
-  checkLink(linkElement) {
-    let result = true;
+        window.addEventListener('popstate', this.onPopstate);
 
-    if (!isElement(linkElement)) {
-      result = false;
-    }
+        const navigate = this.navigate(getCurrentUrl(), {
+            replace: true,
+        });
 
-    if (!linkElement.getAttribute('href')) {
-      result = false;
-    }
+        running = true;
 
-    if (linkElement.getAttribute('rel') === 'external') {
-      result = false;
-    }
+        return navigate;
+    },
 
-    return result;
-  },
+    stop() {
+        running = false;
 
-  start() {
-    if (running) {
-      return Promise.resolve();
-    }
+        window.removeEventListener('popstate', this.onPopstate);
+    },
 
-    running = true;
+    navigate(url, options) {
+        if (running && getCurrentUrl() === url) {
+            return false;
+        }
 
-    window.addEventListener('popstate', this.onPopstate);
-    document.addEventListener('click', this.onClick);
+        const opt = defaults(options || {}, {
+            replace: false,
+        });
 
-    return this.navigate(getCurrentUrl(), {
-      replace: true,
-    });
-  },
+        let routeHandler;
+        let routeParams;
 
-  stop() {
-    running = false;
+        window.history[opt.replace ? 'replaceState' : 'pushState']({}, '', url);
 
-    window.removeEventListener('popstate', this.onPopstate);
-    document.removeEventListener('click', this.onClick);
-  },
+        forEach(this.routes, (handler, pattern) => {
+            const parsedRoute = new Route(pattern);
+            const params = parsedRoute.match(url.split('#')[0]);
 
-  navigate(url, options) {
-    let normalizedUrl = url;
+            if (params) {
+                routePattern = pattern;
+                routeHandler = handler;
+                routeParams = params;
 
-    if (normalizedUrl.indexOf(this.baseUrl) === 0) {
-      normalizedUrl = normalizedUrl.substr(this.baseUrl.length);
-    }
+                return false;
+            }
+        });
 
-    if (normalizedUrl === this.currentUrl) {
-      return false;
-    }
+        return Promise.resolve(routeHandler && routeHandler(routeParams)).catch(this.onError);
+    },
 
-    if (this.currentUrl && (this.currentUrl.split('#')[0] === normalizedUrl.split('#')[0])) {
-      return false;
-    }
+    onError(error) {
+        document.body.innerHTML = error;
+    },
 
-    const opt = defaults(options || {}, {
-      replace: false,
-    });
+    set(params, options) {},
 
-    window.history[opt.replace ? 'replaceState' : 'pushState']({}, '', normalizedUrl);
-
-    this.currentUrl = normalizedUrl;
-
-    return this.loadPage(normalizedUrl).catch(this.renderError);
-  },
-
-  loadPage(url) {
-    const pageUrl = (`${this.pagesRoot}${url.split('?')[0].split('#')[0]}/index`)
-      .split('//')
-      .join('/');
-
-    return System.import(pageUrl).then((Module) => {
-      this.currentPage = new Module.Page();
-    });
-  },
-
-  renderError(error) {
-    document.body.innerHTML = error;
-  },
-
-  query(params) {
-    if (!params) {
-      return qs.parse(document.location.search.substring(1));
-    }
-
-    const currentQuery = qs.parse(document.location.search.substring(1));
-
-    extend(currentQuery, params);
-
-    const url = `${this.baseUrl}/${this.currentUrl}`.split('//').join('/');
-    const queryString = qs.stringify(currentQuery);
-
-    window.history.replaceState({}, '', `${url}?${queryString}`);
-
-    return queryString;
-  },
+    get() {}
 };
 
-export default router;
+module.exports = router;
 

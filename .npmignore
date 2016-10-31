@@ -1,4 +1,4 @@
-testem.js
-app.js
-_*
+__tests__
+coverage
 .*
+npm-debug.log

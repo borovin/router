@@ -1,30 +1,42 @@
 {
-  "name": "router",
-  "version": "1.0.2",
+  "name": "@basket/router",
+  "description": "Simple SPA router with dynamic page loading.",
+  "version": "2.0.1",
   "main": "index.js",
   "scripts": {
-    "start": "node app.js",
-    "test": "npm run testem-ci && npm run lint -s",
-    "testem": "node ./node_modules/testem/testem.js",
-    "testem-ci": "node ./node_modules/testem/testem.js ci -P 5",
-    "lint": "node ./node_modules/eslint/bin/eslint.js ."
+    "test": "jest",
+    "test:coverage": "jest --coverage",
+    "test:codestyle": "eslint ."
   },
   "devDependencies": {
-    "eslint": "^2.0.0",
-    "eslint-config-airbnb": "^6.0.2",
-    "testem": "^1.2.2"
+    "babel-jest": "^16.0.0",
+    "babel-preset-es2015": "^6.16.0",
+    "eslint": "^3.8.1",
+    "jest": "^16.0.2",
+    "jsdom": "latest"
   },
-  "dependencies": {
-    "lodash-es": "^4.6.1",
-    "qs": "^6.1.0",
-    "steal": "^0.16.0"
-  },
-  "system": {
-    "npmIgnore": [
-      "devDependencies"
+  "jest": {
+    "testURL": "http://localhost/test/path?a=1&b=b&c=false#hash",
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!**/node_modules/**",
+      "!**/__tests__/**",
+      "!coverage/**"
     ],
-    "npmAlgorithm": "flat"
+    "coverageThreshold": {
+      "global": {
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    }
   },
   "author": "a@borovin.com",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "lodash.defaults": "^4.2.0",
+    "lodash.foreach": "^4.5.0",
+    "qs": "^6.3.0",
+    "route-parser": "0.0.5"
+  }
 }
