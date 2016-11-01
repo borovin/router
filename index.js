@@ -1,9 +1,9 @@
 const Route = require('route-parser');
 const defaults = require('lodash.defaults');
 const forEach = require('lodash.foreach');
+const qs = require('qs');
 
 let running = false;
-//let routePattern;
 
 function getCurrentUrl() {
     return document.location.pathname + document.location.search + document.location.hash;
@@ -19,13 +19,94 @@ function loadPage(options) {
     return window.System && Promise.resolve(System.import(pageUrl)).then(Page => Page());
 }
 
-const router = {
-    onPopstate() {
-        this.navigate(getCurrentUrl(), {
-            replace: true,
-        });
-    },
+function match() {
+    const result = {};
 
+    forEach(router.routes, (handler, pattern) => {
+        const route = new Route(pattern);
+        const params = route.match(getCurrentUrl());
+
+        if (params) {
+            result.handler = handler;
+            result.params = params;
+            result.route = route;
+            return false;
+        }
+    });
+
+    return result;
+}
+
+function onPopstate() {
+    router.navigate(getCurrentUrl(), {
+        replace: true,
+    });
+}
+
+function getParams() {
+    const route = match().route;
+    const queryString = window.location.search.substring(1);
+    const routeParams = route.match(getCurrentUrl());
+    const queryParams = qs.parse(queryString);
+
+    forEach(queryParams, (val, key) => {
+        try {
+            queryParams[key] = JSON.parse(val);
+        } catch (e) {
+            queryParams[key] = val;
+        }
+    });
+
+    return defaults(routeParams, queryParams);
+}
+
+function setParams(params, options) {
+    const route = match().route;
+    let url = route.reverse(params);
+    let routeParams = route.match(url);
+    let queryParams = {};
+
+    forEach(params, (val, key) => {
+        if (!routeParams.hasOwnProperty(key)) {
+            queryParams[key] = val;
+        }
+    });
+
+    const queryString = qs.stringify(queryParams);
+
+    if (queryString){
+        url += `?${queryString}`;
+    }
+
+    if (window.location.hash){
+        url += window.location.hash;
+    }
+
+    router.navigate(url, options);
+}
+
+function onClick(e) {
+    if (checkLink(e.target)) {
+        e.preventDefault();
+        router.navigate(e.target.getAttribute('href'));
+    }
+}
+
+function checkLink(linkElement) {
+    if (!linkElement.getAttribute('href')) {
+        return false;
+    }
+
+    if (linkElement.getAttribute('href').indexOf('http') === 0){
+        return false;
+    }
+
+    if (linkElement.getAttribute('rel') === 'external') {
+        return false;
+    }
+}
+
+const router = {
     routes: {},
 
     start() {
@@ -35,7 +116,8 @@ const router = {
 
         this.routes['*pagePath'] = loadPage;
 
-        window.addEventListener('popstate', this.onPopstate);
+        window.addEventListener('popstate', onPopstate);
+        document.addEventListener('click', onClick);
 
         const navigate = this.navigate(getCurrentUrl(), {
             replace: true,
@@ -49,7 +131,8 @@ const router = {
     stop() {
         running = false;
 
-        window.removeEventListener('popstate', this.onPopstate);
+        window.removeEventListener('popstate', onPopstate);
+        document.removeEventListener('click', onClick);
     },
 
     navigate(url, options) {
@@ -61,29 +144,19 @@ const router = {
             replace: false,
         });
 
-        let routeHandler;
-        let routeParams;
-
         window.history[opt.replace ? 'replaceState' : 'pushState']({}, '', url);
 
-        forEach(this.routes, (handler, pattern) => {
-            const parsedRoute = new Route(pattern);
-            const params = parsedRoute.match(url.split('#')[0]);
+        const route = match();
 
-            if (params) {
-                //routePattern = pattern;
-                routeHandler = handler;
-                routeParams = params;
-
-                return false;
-            }
-        });
-
-        return Promise.resolve(routeHandler && routeHandler(routeParams)).catch(this.onError);
+        return Promise.resolve(route.handler && route.handler(route.params)).catch(this.onError);
     },
 
     onError(error) {
-        document.body.innerHTML = error;
+        alert(error);
+    },
+
+    params(params, options) {
+        return params ? setParams(params, options) : getParams();
     }
 };
 
