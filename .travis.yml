@@ -19,6 +19,7 @@ branches:
   only:
   - master
   - dev
+  - /^greenkeeper-.*$/
 deploy:
   provider: npm
   api_key: $NPM_AUTH_TOKEN
