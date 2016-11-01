@@ -1,6 +1,7 @@
 const router = require('../index');
 
 afterEach(() => {
+    router.navigate('/test/path?a=1&b=b&c=false#hash');
     router.stop();
     router.routes = {};
 });
@@ -54,12 +55,30 @@ it('should prevent from navigating at the same url', () => {
     expect(handler).toHaveBeenCalledTimes(1);
 });
 
-it('onPopstate handler should call navigate method', () => {
-    router.navigate = jest.fn();
+it('should return route params', () => {
+    router.routes = {
+        '/test/:b': function(){}
+    };
+
+    expect(router.params()).toEqual({
+        b: 'path',
+        a: 1,
+        c: false
+    });
+});
+
+it('should set route params', () => {
+    router.routes = {
+        '/test/:b': function(){}
+    };
 
     router.start();
 
-    router.onPopstate();
+    router.params({
+        b: 'b',
+        a: 2,
+        c: true
+    });
 
-    expect(router.navigate).toHaveBeenCalledWith('/test/path?a=1&b=b&c=false#hash', {replace: true});
+    expect(window.location.href).toBe('http://localhost/test/b?a=2&c=true#hash');
 });
