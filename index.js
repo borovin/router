@@ -85,6 +85,27 @@ function setParams(params, options) {
     router.navigate(url, options);
 }
 
+function onClick(e) {
+    if (checkLink(e.target)) {
+        e.preventDefault();
+        router.navigate(e.target.getAttribute('href'));
+    }
+}
+
+function checkLink(linkElement) {
+    if (!linkElement.getAttribute('href')) {
+        return false;
+    }
+
+    if (linkElement.getAttribute('href').indexOf('http') === 0){
+        return false;
+    }
+
+    if (linkElement.getAttribute('rel') === 'external') {
+        return false;
+    }
+}
+
 const router = {
     routes: {},
 
@@ -96,6 +117,7 @@ const router = {
         this.routes['*pagePath'] = loadPage;
 
         window.addEventListener('popstate', onPopstate);
+        document.addEventListener('click', onClick);
 
         const navigate = this.navigate(getCurrentUrl(), {
             replace: true,
@@ -110,6 +132,7 @@ const router = {
         running = false;
 
         window.removeEventListener('popstate', onPopstate);
+        document.removeEventListener('click', onClick);
     },
 
     navigate(url, options) {
