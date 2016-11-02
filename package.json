@@ -1,7 +1,7 @@
 {
   "name": "@basket/router",
   "description": "Simple SPA router with dynamic page loading.",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -31,8 +31,7 @@
   "author": "a@borovin.com",
   "license": "MIT",
   "dependencies": {
-    "lodash.defaults": "^4.2.0",
-    "lodash.foreach": "^4.5.0",
+    "lodash": "^4.16.6",
     "qs": "^6.3.0",
     "route-parser": "0.0.5"
   }

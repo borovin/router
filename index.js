@@ -1,6 +1,6 @@
 const Route = require('route-parser');
-const defaults = require('lodash.defaults');
-const forEach = require('lodash.foreach');
+const defaults = require('lodash/defaults');
+const forEach = require('lodash/forEach');
 const qs = require('qs');
 
 let running = false;
