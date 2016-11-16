@@ -31,7 +31,7 @@
   "author": "a@borovin.com",
   "license": "MIT",
   "dependencies": {
-    "lodash": "^4.16.6",
+    "lodash": "^4.17.2",
     "qs": "^6.3.0",
     "route-parser": "0.0.5"
   }
