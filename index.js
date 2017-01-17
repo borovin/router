@@ -12,9 +12,8 @@ function getCurrentUrl() {
 function loadPage(options) {
     const url = options.pagePath;
 
-    const pageUrl = (`pages/${url.split('?')[0].split('#')[0]}/index`)
-        .split('//')
-        .join('/');
+    const pageUrl = (`app/pages/${url.split('?')[0].split('#')[0]}/index`)
+        .replace(/(\/+)/ig, '/');
 
     return window.System && Promise.resolve(System.import(pageUrl)).then(Page => Page());
 }
